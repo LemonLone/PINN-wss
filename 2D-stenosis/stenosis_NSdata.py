@@ -604,7 +604,7 @@ def geo_train(device,x_in,y_in,xb,yb,ub,vb,xd,yd,ud,vd,batchsize,learning_rate,e
 #######################################################
 #Main code:
 #device = torch.device("cpu")
-device = torch.device("cuda")
+device = torch.device("cuda:0")
 
 
 Flag_batch = True 
@@ -614,7 +614,7 @@ Lambda_BC  = 20.
 Lambda_data = 1.
 
 #Directory = "/home/aa3878/Data/ML/Amir/stenosis/"
-Directory = "/scratch/aa3878/PINN/stenosis/PINN/"
+Directory = "Data/2D-stenosis/"
 mesh_file = Directory + "sten_mesh000000.vtu"
 bc_file_in = Directory + "inlet_BC.vtk"
 bc_file_wall = Directory + "wall_BC.vtk"
@@ -622,11 +622,11 @@ bc_file_wall = Directory + "wall_BC.vtk"
 File_data = Directory + "velocity_sten_steady.vtu"
 fieldname = 'f_5-0' #The velocity field name in the vtk file (see from ParaView)
 
-batchsize = 256 
+batchsize = 4096
 learning_rate = 1e-5 
 
 
-epochs  = 5500 
+epochs  = 8500 
 
 Flag_pretrain = False # True #If true reads the nets from last run
 

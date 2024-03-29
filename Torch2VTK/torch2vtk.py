@@ -199,7 +199,6 @@ def create_vtk(x,y):
 		u = u.view(len(u),-1)
 	
 		u_y = torch.autograd.grad(u,y,grad_outputs=torch.ones_like(y),create_graph = True,only_inputs=True)[0]
-
 		return Diff*rho * u_y  #shear stress
 
 	
@@ -423,9 +422,10 @@ def create_vtk(x,y):
 	net2_u = Net2_u().to(device)
 	net2_v = Net2_v().to(device)
 	net2_p = Net2_p().to(device)
-	#net1_dist = Net1_dist().to(device)
-	#net1_bc_u = Net1_bc_u().to(device)
-	#net1_bc_v = Net1_bc_v().to(device)
+ 
+	net1_dist = Net1_dist().to(device)
+	net1_bc_u = Net1_bc_u().to(device)
+	net1_bc_v = Net1_bc_v().to(device)
 
 
 	def criterion_plot(x,y):
@@ -510,9 +510,9 @@ def create_vtk(x,y):
 		output_u = output_u.data.numpy() 
 		
 		plt.figure()
-		plt.subplot(2, 1, 1)
-		plt.scatter(x.detach().numpy(), y.detach().numpy(), c = output_u , cmap = 'rainbow')
-		#plt.scatter(x.detach().numpy(), y.detach().numpy(), c = output_u ,vmin=0, vmax=0.58, cmap = 'rainbow')
+		#plt.subplot(2, 1, 1)
+		#plt.scatter(x.detach().numpy(), y.detach().numpy(), c = output_u , cmap = 'rainbow')
+		plt.scatter(x.detach().numpy(), y.detach().numpy(), c = output_u ,vmin=0, vmax=0.58, cmap = 'rainbow')
 		plt.title('NN results, u')
 		plt.colorbar()
 		plt.show()
@@ -544,9 +544,9 @@ def create_vtk(x,y):
 		outputbc_u = net1_bc_u(net_in)  #evaluate model
 		outputbc_u = outputbc_u.data.numpy() 
 		plt.figure()
-		plt.subplot(2, 1, 1)
-		plt.scatter(x.detach().numpy(), y.detach().numpy(), c = outputbc_u , cmap = 'rainbow')
-		#plt.scatter(x.detach().numpy(), y.detach().numpy(), c = outputbc_u ,vmin=0, vmax=0.5, cmap = 'rainbow')
+		#plt.subplot(2, 1, 1)
+		#plt.scatter(x.detach().numpy(), y.detach().numpy(), c = outputbc_u , cmap = 'rainbow')
+		plt.scatter(x.detach().numpy(), y.detach().numpy(), c = outputbc_u ,vmin=0, vmax=0.5, cmap = 'rainbow')
 		plt.title('NN results, BC u')
 		plt.colorbar()
 		plt.show()
@@ -556,13 +556,20 @@ def create_vtk(x,y):
 		outputbc_u = net1_dist(net_in)  #evaluate model
 		outputbc_u = outputbc_u.data.numpy() 
 		plt.figure()
-		plt.subplot(2, 1, 1)
+		#plt.subplot(2, 1, 1)
 		plt.scatter(x.detach().numpy(), y.detach().numpy(), c = outputbc_u , cmap = 'rainbow')
 		#plt.scatter(x.detach().numpy(), y.detach().numpy(), c = outputbc_u ,vmin=0, vmax=0.01, cmap = 'rainbow')
 		plt.title('NN results, Distance')
 		plt.colorbar()
 		plt.show()
 
+	nPt = 130  
+	xStart = 0.
+	xEnd = 1.
+	yStart = 0.
+	yEnd = 1.0
+	delta_wall = 0
+ 
 	if(Flag_plot): #Calculate WSS at the bottom wall
 		xw = np.linspace(xStart + delta_wall , xEnd, nPt)
 		yw = np.linspace(yStart , yStart, nPt)
@@ -683,19 +690,20 @@ rho = 1.
 Flag_BC_exact = False 
 device = torch.device("cpu")
 
-Flag_plot = False #True: for also plotting in python
+Flag_plot = True #True: for also plotting in python
 Flag_save_BC = False
 
 #!!! Need to make the vtk mesh with Paraview 4.0 if we get Python VTK reading error
 
-Flag_physical = True #IF True use the physical mesh, not the normalized dimension mesh
+Flag_physical = False #IF True use the physical mesh, not the normalized dimension mesh
 
 if (Flag_physical):
 	mesh_file = "/home/aa3878/Data/ML/Amir/stenosis/sten_mesh_physical000000.vtu"
 else:
-	mesh_file = "/home/aa3878/Data/ML/Amir/stenosis/sten_mesh000000.vtu"
+	#mesh_file = "/home/aa3878/Data/ML/Amir/stenosis/sten_mesh000000.vtu"
+ 	mesh_file = "Data/2D-stenosis/sten_mesh000000.vtu"
 #output_filename = "/home/aa3878/Data/ML/Amir/stenosis/Results/stenosis_PINN_physical.vtk"
-output_filename = "/home/aa3878/Data/ML/Amir/stenosis/Results/stenosis_PINN_data.vtk"
+output_filename = "E:\Python\zhangyouzi\PINN-wss\Results\stenosis_PINN_data.vtk"
 
 NN_filename_prefix = "sten_data_" # "sten_"  
 

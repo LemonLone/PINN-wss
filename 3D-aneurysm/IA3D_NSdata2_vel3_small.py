@@ -104,11 +104,12 @@ def geo_train(device,x_in,y_in,z_in,xb,yb,zb,ub,vb,wb,xd,yd,zd,ud,vd,wd,batchsiz
 		def __init__(self):
 			super(Net2_u, self).__init__()
 			self.main = nn.Sequential(
+				#nn.Linear(input_n,h_n)创建了一个新的线性层，它将接收input_n个特征的输入，输出h_n个特征的输出。
 				nn.Linear(input_n,h_n),
 				#nn.Tanh(),
 				#nn.Sigmoid(),
 				#nn.BatchNorm1d(h_n),
-				Swish(),
+				Swish(),#激活函数，非线性话
 				nn.Linear(h_n,h_n),
 				#nn.Tanh(),
 				#nn.Sigmoid(),
@@ -160,7 +161,7 @@ def geo_train(device,x_in,y_in,z_in,xb,yb,zb,ub,vb,wb,xd,yd,zd,ud,vd,wd,batchsiz
 			output = self.main(x)
 			#output_bc = net1_bc_u(x)
 			#output_dist = net1_dist(x)
-			if (Flag_BC_exact):
+			if (Flag_BC_exact):#False
 				output = output*(x- xStart) *(y- yStart) * (y- yEnd ) + U_BC_in + (y- yStart) * (y- yEnd )  #modify output to satisfy BC automatically #PINN-transfer-learning-BC-20
 			#return  output * (y_in-yStart) * (y_in- yStart_up)
 			#return output * dist_bc + v_bc
@@ -410,7 +411,7 @@ def geo_train(device,x_in,y_in,z_in,xb,yb,zb,ub,vb,wb,xd,yd,zd,ud,vd,wd,batchsiz
 	optimizer_p = optim.Adam(net2_p.parameters(), lr=learning_rate, betas = (0.9,0.99),eps = 10**-15)
 
 
-
+#用来指代评估模型性能或决定优化方向的度量标准。
 
 	def criterion(x,y,z):
 
@@ -421,7 +422,13 @@ def geo_train(device,x_in,y_in,z_in,xb,yb,zb,ub,vb,wb,xd,yd,zd,ud,vd,wd,batchsiz
 
 		#x = torch.FloatTensor(x).to(device)
 		#x= torch.from_numpy(x).to(device)
-
+  
+# 这段代码是在使用PyTorch库设置张量x的requires_grad属性为True。
+# 在PyTorch中，requires_grad是一个布尔值，用于指示是否需要计算和存储该张量在反向传播过程中的梯度。
+# 如果x.requires_grad = True，那么在进行反向传播时，PyTorch会自动计算x的梯度，
+# 并将结果存储在x.grad属性中。这个梯度可以用于优化算法，如随机梯度下降，来更新模型的参数。
+# 这种设置通常在你需要训练模型的参数时使用。如果一个张量不需要被优化，或者在计算过程中不需要其梯度，
+# 那么可以将requires_grad设置为False，以节省内存和计算资源。
 		x.requires_grad = True
 		y.requires_grad = True
 		z.requires_grad = True
@@ -430,6 +437,15 @@ def geo_train(device,x_in,y_in,z_in,xb,yb,zb,ub,vb,wb,xd,yd,zd,ud,vd,wd,batchsiz
 		#v0 = v0.detach()
 		
 		#net_in = torch.cat((x),1)
+  
+# 这段代码是在使用PyTorch的torch.cat函数将张量x、y和z在维度1上进行拼接，并将结果赋值给net_in。
+# torch.cat是一个函数，它接收一个张量的序列和一个维度作为输入，返回一个新的张量，
+# 新张量是在指定维度上将输入的张量序列拼接起来的结果。
+# 在这个例子中，(x,y,z)是一个包含张量x、y和z的元组，1是拼接的维度。
+# torch.cat((x,y,z),1)将张量x、y和z在维度1上拼接起来。
+# 例如，如果x、y和z的形状都是[10, 20]，那么torch.cat((x,y,z),1)将返回一个形状为[10, 60]的新张量。
+# 这种操作通常在你需要将多个张量在某个维度上拼接起来时使用。
+# 在这个例子中，它将x、y和z在维度1上拼接起来，可能是为了将它们作为神经网络的输入。
 		net_in = torch.cat((x,y,z),1)
 		u = net2_u(net_in)
 		u = u.view(len(u),-1)
@@ -686,7 +702,7 @@ Lambda_BC  = 20.  ## If not enforcing BC exacctly.
 Lambda_data = 20.  
 
 #Directory = "/home/aa3878/Data/ML/Amir/stenosis/"
-Directory = "/scratch/aa3878/PINN/IA/3D/"
+Directory = "Data/3D-aneurysm/"
 mesh_file = Directory + "IA_mesh3D_nearwall_small_physical.vtu" #"IA3D_nearwall_correct.vtu"
 outer_wall_location = Directory + "IA_nearwall_outer_small.vtk"
 bc_file_wall = Directory + "IA_nearwall_wall_small.vtk"
@@ -694,7 +710,7 @@ bc_file_wall = Directory + "IA_nearwall_wall_small.vtk"
 File_data = Directory + "IA_3D_unsteady3.vtu"
 fieldname = 'f_17' #The velocity field name in the vtk file (see from ParaView)
 
-batchsize = 512 
+batchsize = 4096 
 learning_rate = 1e-5 
 
 
@@ -736,14 +752,14 @@ reader = vtk.vtkXMLUnstructuredGridReader()
 reader.SetFileName(mesh_file)
 reader.Update()
 data_vtk = reader.GetOutput()
-n_points = data_vtk.GetNumberOfPoints()
+n_points = data_vtk.GetNumberOfPoints()#(x,y,z)
 print ('n_points of the mesh:' ,n_points)
 x_vtk_mesh = np.zeros((n_points,1))
 y_vtk_mesh = np.zeros((n_points,1))
 z_vtk_mesh = np.zeros((n_points,1))
 VTKpoints = vtk.vtkPoints()
 for i in range(n_points):
-	pt_iso  =  data_vtk.GetPoint(i)
+	pt_iso  =  data_vtk.GetPoint(i)#(x,y,z)
 	x_vtk_mesh[i] = pt_iso[0]	
 	y_vtk_mesh[i] = pt_iso[1]
 	z_vtk_mesh[i] = pt_iso[2]
@@ -757,7 +773,7 @@ y  = np.reshape(y_vtk_mesh , (np.size(y_vtk_mesh [:]),1)) / YZ_scale
 z  = np.reshape(z_vtk_mesh , (np.size(z_vtk_mesh [:]),1)) / YZ_scale
 
 
-
+#设置x,y取值范围
 nPt = 130  
 xStart = 0.
 xEnd = 1.
@@ -832,6 +848,9 @@ zb_wall  = np.reshape(z_vtk_mesh , (np.size(z_vtk_mesh [:]),1)) / YZ_scale
 #u_in_BC = np.linspace(U_BC_in, U_BC_in, n_points) #constant uniform BC
 u_in_BC = (yb_in[:]) * ( 0.3 - yb_in[:] )  / 0.0225 * U_BC_in #parabolic
 
+#np.linspace是一个函数，它生成一个等差数列。
+#在这个例子中，np.linspace(0., 0., n_pointsw)生成一个起始值和结束值都为0的等差数列，元素数量为n_pointsw。
+#因为起始值和结束值都为0，所以这个等差数列的所有元素都是0。
 
 v_in_BC = np.linspace(0., 0., n_points)
 w_in_BC = np.linspace(0., 0., n_points)
@@ -877,6 +896,11 @@ wb_inlet = w_in_BC
 #yb_dist = np.concatenate((yleft, yup,yrightw, ydown,ydown2,yright), 0)
 ####
 
+#这段代码是在使用NumPy的reshape方法改变数组xb的形状。
+#reshape方法返回一个有着不同大小的新数组，其数据与原数组相同。这是一种改变数组形状的方法，类似于PyTorch中的view方法。
+#在这个例子中，-1是一个特殊的值，表示自动计算该维度的大小，以保证新数组的元素总数与原数组相同。1表示第二个维度的大小为1。
+#例如，如果xb的形状是[10, 2]，那么xb.reshape(-1, 1)将返回一个形状为[20, 1]的新数组。
+#这种操作通常在你需要将多维的数据展平为一维，或者更改数据的维度以适应特定的操作（例如全连接层）时使用。
 
 #tb= tb.reshape(-1, 1) #need to reshape to get 2D array
 xb= xb.reshape(-1, 1) #need to reshape to get 2D array
@@ -999,6 +1023,9 @@ wd= data_vel_w.reshape(-1, 1) #need to reshape to get 2D array
 
 
 #path = pre+"aneurysmsigma01scalepara_100pt-tmp_"+str(ii)
+#x,y,z,mesh file
+#xb,yb,zb,ub,vb,wb
+#xd,yd,zd加点的位置
 geo_train(device,x,y,z,xb,yb,zb,ub,vb,wb,xd,yd,zd,ud,vd,wd,batchsize,learning_rate,epochs,path,Flag_batch,Diff,rho,Flag_BC_exact,Lambda_BC,nPt,T,xb_inlet,yb_inlet, zb_inlet, ub_inlet,vb_inlet, wb_inlet )
 #tic = time.time()
 

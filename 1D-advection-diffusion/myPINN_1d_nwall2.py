@@ -310,7 +310,7 @@ nPt = 100
 xStart = 0.
 xEnd = 1.
 
-batchsize = 32 
+batchsize = 64 
 learning_rate = 1e-6 
 
 

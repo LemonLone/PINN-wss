@@ -610,7 +610,7 @@ Lambda_BC  = 1.
 Lambda_data = 1.
 
 #Directory = "/home/aa3878/Data/ML/Amir/stenosis/"
-Directory = "/scratch/aa3878/PINN/IA/PINN/"
+Directory = "Data/2D-aneurysm/"
 mesh_file = Directory + "IA_mesh_correct_crop.vtu"
 bc_file_in = Directory + "inlet_BC_crop_correct.vtk"
 bc_file_wall = Directory + "wall_BC_crop_correct.vtk"
@@ -618,11 +618,11 @@ bc_file_wall = Directory + "wall_BC_crop_correct.vtk"
 File_data = Directory + "velocity_IA_steady.vtu"
 fieldname = 'f_5-0' #The velocity field name in the vtk file (see from ParaView)
 
-batchsize = 256  
+batchsize = 4096  
 learning_rate = 1e-5 
 
 
-epochs  = 5500 
+epochs  = 10000 
 
 Flag_pretrain = False # True #If true reads the nets from last run
 
