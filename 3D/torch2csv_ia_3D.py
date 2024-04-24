@@ -490,9 +490,6 @@ def create_csv(x,y,z):
 	net2_v.load_state_dict(torch.load(path+ NN_filename_prefix + "v.pt"))
 	net2_w.load_state_dict(torch.load(path+ NN_filename_prefix + "w.pt"))
 	net2_p.load_state_dict(torch.load(path+ NN_filename_prefix + "p.pt"))
-	#net2_u.load_state_dict(torch.load(path+"stenBatch_u"+ ".pt"))
-	#net2_v.load_state_dict(torch.load(path+"stenBatch_v"+ ".pt"))
-	#net2_p.load_state_dict(torch.load(path+"stenBatch_p"+ ".pt"))
 
 
 	net2_u.eval()
@@ -522,27 +519,33 @@ def create_csv(x,y,z):
 	df[' Velocity w [ m s^-1 ]'] = Velocity[:,2]
 	df.to_csv(output_filename_uvw, index=False)
 	print(df)
-
+	header = "[Name]\nVelocity\n\n[Data]\n"
+	# 读取CSV文件
+	with open(output_filename_uvw, 'r') as file:
+		csv_data = file.read()
+	# 将新的行和原始的CSV文件内容写入文件
+	with open(output_filename_uvw, 'w') as file:
+		file.write(header + csv_data)
 	print ('Done!' )
 
 
 ############## Set parameters here (make sure you are calling the appropriate network in the code. Network code needs to be compied here)
-Directory = "E:/Python/zhangyouzi/PINN-wss/3D/"
+Directory = "/home/Cuihaitao/PINN-wss/3D/"
 device = torch.device("cpu")
 outer_wall_location_csv = Directory+"velocity_1.csv" 
 output_filename_xyz = Directory + "Results/output_xyz.csv"
 output_filename_uvw = Directory + "Results/output_v.csv"
-NN_filename_prefix = "IA3D_data3velsmall_" 
+NN_filename_prefix = "IA3D_data3vel_" 
 
-X_scale = 3. #2
-Y_scale = 2. #1.
+X_scale = 0.037723254 #2
+Y_scale = 0.037723254 #1.
 U_scale = 1.0
 U_BC_in = 1.0 #0.5
 
 Flag_BC_exact = False
 
 
-path = "Results/"
+path = Directory + "Results/results_tmp/"
 
 
 print ('Loading', outer_wall_location_csv)
